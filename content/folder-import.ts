@@ -1,16 +1,10 @@
 declare var Zotero: any // eslint-disable-line no-var
-declare const FileUtils: any
 declare const Services: any
-
-declare const Components: any
-Components.utils.import('resource://gre/modules/FileUtils.jsm')
-
 declare const ChromeUtils: any
 
 import { FilePickerHelper, ZoteroToolkit } from 'zotero-plugin-toolkit'
 const ztoolkit = new ZoteroToolkit()
 
-import { DebugLog as DebugLogSender } from 'zotero-plugin/debug-log'
 import { log } from './debug'
 
 declare const OS: {
@@ -156,10 +150,11 @@ class FolderScanner {
 
 export class $FolderImport {
   private status: { total: number; done: number }
+  private menuRegisteredID: string | null = null
 
   public async startup() {
     await Zotero.initializationPromise
-    DebugLogSender.register('Folder import', [])
+    log.info('startup')
     for (const win of Zotero.getMainWindows()) {
       if (win.ZoteroPane) this.onMainWindowLoad(win)
     }
@@ -172,17 +167,34 @@ export class $FolderImport {
   }
 
   public onMainWindowLoad(win: Window) {
-    log.debug('onMainWindowLoad')
+    const doc = win.document
+    const fileMenu = doc.getElementById('menu_FilePopup')
+    if (!fileMenu) return
 
-    ztoolkit.Menu.register('menuFile', {
-      tag: 'menuitem',
-      label: 'Add Files from Folder…',
-      oncommand: 'Zotero.FolderImport.addAttachmentsFromFolder()',
+    const menuItem = doc.createXULElement('menuitem')
+    menuItem.id = 'folder-import-menuitem'
+    menuItem.setAttribute('label', 'Add Files from Folder…')
+    menuItem.addEventListener('command', () => {
+      Zotero.FolderImport.addAttachmentsFromFolder()
     })
+
+    const importFromClipboard = doc.getElementById('menu_import_clipboard')
+    if (importFromClipboard && importFromClipboard.nextSibling) {
+      fileMenu.insertBefore(menuItem, importFromClipboard.nextSibling)
+    } else {
+      const exportLibrary = doc.getElementById('menu_exportLibrary')
+      if (exportLibrary) {
+        fileMenu.insertBefore(menuItem, exportLibrary)
+      } else {
+        fileMenu.appendChild(menuItem)
+      }
+    }
   }
 
   public onMainWindowUnload(win: Window) {
-    ztoolkit.Menu.unregisterAll()
+    const doc = win.document
+    const menuItem = doc.getElementById('folder-import-menuitem')
+    if (menuItem) menuItem.remove()
   }
 
   public update() {
@@ -204,7 +216,7 @@ export class $FolderImport {
     const duplicates: string = PathUtils.join(Zotero.getTempDirectory().path as string, `rmlint${Zotero.Utilities.randomString()}.json`)
 
     try {
-      const cmd = new FileUtils.File(rmlint)
+      const cmd = Zotero.File.pathToFile(rmlint)
       if (!cmd.isExecutable()) return []
 
       const proc = Components.classes['@mozilla.org/process/util;1'].createInstance(Components.interfaces.nsIProcess)

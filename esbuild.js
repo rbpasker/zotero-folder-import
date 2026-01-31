@@ -8,8 +8,8 @@ const pretty = require('pretty')
 rmrf.sync('gen')
 
 require('zotero-plugin/copy-assets')
-require('zotero-plugin/rdf')
-require('zotero-plugin/version')
+require('zotero-plugin/make-manifest')
+require('zotero-plugin/make-version')
 
 async function bundle(entry) {
   const outdir = path.join('build', path.basename(path.dirname(entry)))

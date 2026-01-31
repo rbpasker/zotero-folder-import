@@ -6,7 +6,8 @@
     "importHelpers": true,
     "target": "es2017",
     "disableSizeLimit": true,
-    "module": "commonjs",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
     "noImplicitAny": false,
     "removeComments": false,
     "preserveConstEnums": false,
@@ -16,6 +17,7 @@
     "types": [ "node" ],
     "typeRoots": [ "./node_modules/@types" ],
     "skipDefaultLibCheck": true,
+    "skipLibCheck": true,
   },
   "include": [ "bootstrap.ts", "content/folder-import.ts", "content/globals.d.ts", "node_modules/zotero-types" ],
   "exclude": [
