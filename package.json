@@ -1,8 +1,9 @@
 {
   "name": "zotero-folder-import",
-  "version": "0.0.9",
+  "version": "0.1.0",
   "description": "Import folder of attachments into a collection hierarchy",
   "scripts": {
+    "postinstall": "patch-package || true",
     "lint": "dprint fmt bootstrap.ts content/*.ts && dprint check bootstrap.ts content/*.ts",
     "prebuild": "npm run lint",
     "build": "rm -rf build && tsc --noEmit && node esbuild.js",
@@ -27,6 +28,7 @@
   "devDependencies": {
     "dprint": "^0.50.0",
     "esbuild": "^0.25.5",
+    "patch-package": "^8.0.0",
     "pretty": "^2.0.0",
     "pug": "^3.0.3",
     "rimraf": "^6.0.1",
@@ -41,6 +43,6 @@
     "releaseURL": "https://github.com/retorquere/zotero-folder-import/releases/download/release/"
   },
   "dependencies": {
-    "zotero-plugin-toolkit": "^5.0.1"
+    "zotero-plugin-toolkit": "5.1.0-beta.13"
   }
 }
